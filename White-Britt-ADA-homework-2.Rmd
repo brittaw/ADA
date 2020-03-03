@@ -9,19 +9,104 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+##Load necessary packages
+library(tidyverse)
+##Load data file 
+f <- file.choose()
+##Convert into tibble
+d <- read_csv(f, col_names = TRUE)
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{movies csv}
+##Load necessary packages
+library(tidyverse)
+##Load data file 
+f <- file.choose()
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+d <- read_csv(f, col_names = TRUE) # creates a "tibble"
 ```
 
-## Including Plots
+##Challenge 1
+###Filter data:1920 to 1979 & movies that are (runtimeMinutes < 240)
+###library(dplyr) from the tidyverse is used here explicitly 
+s <- filter(d, startYear >= 1920, startYear <= 1979, runtimeMinutes < 240)
+head(s)
+##Trying to find someway to get decades as a new column of data
+s <- mutate(s, 
+  decade = startYear - 1900)
 
-You can also embed plots, for example:
+###Use {ggplot2} to plot histograms of the distribution of runtimeMinutes for each decade.
+p <- ggplot(data = s, aes(x = decade)) + 
+  geom_histogram(aes(y = runtimeMinutes)) 
++
+  facet_wrap(~ class, nrow = 2)
+
+###calculate the population mean and population standard deviation in runtimeMinutes for each decade - apparantely need the pipe operator...
+results <- mean(runtimeMinutes)/decade
+
+###subsample 100 movies from each decade, calculate mean and standard deviation in runtimeMinutes, estimate the SE around the pop mean runtimeMinutes for each decade...lots of info...
+
+n = 100
+
+###Compare results to actual pop means for runtimeMinutes and calculated SE ...lots of info...
+
+stuff
+
+###Generate a sampling distribution of mean runtimeMinutes for each decade by [a] drawing 10,000 samples of 100 movies from each decade and, for each sample, [b] calculating the mean runtimeMinutes and the standard deviation in runtimeMinutes. Recall that the standard deviation of the sampling distribution is another estimate of the standard error in the opulation mean for a particular sample size.
+
+##Challenge 2
+##Complicated details and language...
+###What is the probability that she will hear 13 or fewer calls during any given session?
+code
+###What is the probability that she will hear no calls in a session?
+code
+###What is the probability that she will hear exactly 7 calls in a session?
+code
+###What is the probability that she will hear more than 20 calls in a session?
+code
+###Plot the relevant Poisson mass function over the values in range 0 ≤ x ≤ 40.
+plot(Poisson, x =< 40, x =>0)
+###simulate 520 results from this distribution (i.e., 10 full years of Saturday monitoring sessions).
+rpois(x)
+###Plot the simulated results using the histogram() function from the {mosaic} package and use xlim() to set the horizontal limits to be from 0 to 40. How do your simulated results compare to the shape of the probability mass function you plotted above?
+library(mosaic)
+lattice::histogram(~fastest,data=m111survey,
+       type="density",
+       xlab="speed (mph)",
+       main="Fastest Speed Ever Driven")
+       
+##Challenge 3
+library(curl)
+f <- curl("https://raw.githubusercontent.com/difiore/ADA-datasets/master/zombies.csv")
+d <- read_csv(f, col_names = TRUE) # creates a "tibble"
+
+###Calculate the population mean and standard deviation for each quantitative random variable (height, weight, age, number of zombies killed, and years of education).
+
+pop mean and sdev again
+
+###Use {ggplot2} and make scatterplots of height and weight in relation to age. Do these variables seem to be related? (YES) In what way? (LINEAR RELATIONSHIP)
+
+library(ggplot2)
+# Basic scatter plot height
+(h <- ggplot(d, aes(x=height, y=age)) + geom_point())
+# Basic scatter plot weight
+(w <- ggplot(d, aes(x=weight, y=age)) + geom_point())
+
+###Using histograms and Q-Q plots, check whether the quantitative variables seem to be drawn from a normal distribution. Which seem to be and which do not?
+
+plot for histogram and qqplots
+
+manipulate(
+  ggplot(data = data.frame(x = c(mu - 4 * sigma, mu + 4 * sigma)), aes(x)) + stat_function(fun = dnorm, args = list(mean = mu, sd = sigma), n = 1000) + xlab("x") + ylab("f(x)") + labs(title = "Exploring the Normal Distribution", subtitle = paste0("Cumulative Probability Under Curve = ", round(pnorm(mu + nsigma * sigma, mu, sigma) - pnorm(mu - nsigma * sigma, mu, sigma), 3))) +
+    stat_function(fun = dnorm, xlim = c(mu - nsigma * sigma, mu + nsigma * sigma), args = list(mean = mu, sd = sigma), n = 1000, geom = "area", fill = "red", alpha = 0.5, color = "red"),
+  mu = slider(-100, 100, initial = 0, step = 10),
+  sigma = slider(0, 30, initial = 5, step = 1),
+  nsigma = slider(0, 4, initial = 0, step = 0.25)
+)
+
+###Now use the sample_n() function from {dplyr} to sample ONE subset of 30 zombie apocalypse survivors (without replacement) from this population and calculate the mean and sample standard deviation for each variable. Also estimate the standard error for each variable and construct the 95% confidence interval for each mean. Note that for the variables that are not drawn from the normal distribution, you will need to base your estimate of the CIs on some different theoretical distribution!
+sample_n()
+
+###Now draw another 99 random samples of 30 zombie apocalypse survivors out and calculate the mean for each of the these samples. Together with the first sample you drew out, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of the sampling distribution for each variable? How do the standard deviations compare to the standard errors estimated in the question about and to those calculated using the population standard deviation? What do these sampling distributions look like? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
 
 ```{r pressure, echo=FALSE}
 plot(pressure)
