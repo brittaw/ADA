@@ -1,0 +1,51 @@
+<html>
+
+<head>
+<title>Title</title>
+</head>
+
+<body>
+
+<p>This is an R HTML document. When you click the <b>Knit HTML</b> button a web page will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:</p>
+
+<!--begin.rcode
+##Load necessary packages
+library(tidyverse)
+##Load data file 
+f <- file.choose()
+##Convert into tibble
+d <- read_csv(f, col_names = TRUE)
+
+
+##Challenge 1
+###Filter data:1920 to 1979 & movies that are (runtimeMinutes < 240)
+###library(dplyr) from the tidyverse is used here explicitly 
+s <- filter(d, startYear >= 1920, startYear <= 1979, runtimeMinutes < 240)
+head(s)
+##!!!I should have 5741 not 5727!!!
+
+##Trying to find someway to get decades as a new column of data
+s <- mutate(s, 
+  decade = s %>%
+  select(name:startYear) %>%
+  mutate(
+    type = case_when(
+      startYear == 1920:1929 ~ "20s"
+      1930:1939 ~ "30s"
+      1940:1949 ~ "40s"
+      1950:1959 ~ "50s"
+      1960:1969 ~ "60s"
+      1970:1979 ~ "70s"
+      1980:1989 ~ "80s"
+      1990:1999 ~ "90s"
+    )
+  ))end.rcode-->
+
+<p>You can also embed plots, for example:</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+plot(cars)
+end.rcode-->
+
+</body>
+</html>

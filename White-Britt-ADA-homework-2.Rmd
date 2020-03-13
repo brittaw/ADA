@@ -3,113 +3,318 @@ title: "White-Britt-ADA-homework-2"
 author: "BA White"
 date: "3/3/2020"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
 ##Load necessary packages
+```
 library(tidyverse)
+```
 ##Load data file 
+```
 f <- file.choose()
+```
 ##Convert into tibble
+```
 d <- read_csv(f, col_names = TRUE)
-
-```{movies csv}
-##Load necessary packages
-library(tidyverse)
-##Load data file 
-f <- file.choose()
-
-d <- read_csv(f, col_names = TRUE) # creates a "tibble"
 ```
 
 ##Challenge 1
-###Filter data:1920 to 1979 & movies that are (runtimeMinutes < 240)
+##1##Filter data:1920 to 1979 & movies that are (runtimeMinutes < 240)
 ###library(dplyr) from the tidyverse is used here explicitly 
-s <- filter(d, startYear >= 1920, startYear <= 1979, runtimeMinutes < 240)
-head(s)
 ##Trying to find someway to get decades as a new column of data
-s <- mutate(s, 
-  decade = startYear - 1900)
+```
+s <- filter(d, startYear >= 1920, startYear <= 1979, runtimeMinutes < 240) %>%
+  mutate(decade = case_when(startYear %in% 1920:1929 ~ "20s",
+                            startYear %in% 1930:1939 ~ "30s",
+                            startYear %in% 1940:1949 ~ "40s",
+                            startYear %in% 1950:1959 ~ "50s",
+                            startYear %in% 1960:1969 ~ "60s",
+                            startYear %in% 1970:1979 ~ "70s"))
 
-###Use {ggplot2} to plot histograms of the distribution of runtimeMinutes for each decade.
-p <- ggplot(data = s, aes(x = decade)) + 
-  geom_histogram(aes(y = runtimeMinutes)) 
-+
-  facet_wrap(~ class, nrow = 2)
+s
+```
 
-###calculate the population mean and population standard deviation in runtimeMinutes for each decade - apparantely need the pipe operator...
-results <- mean(runtimeMinutes)/decade
+##2##Use {ggplot2} to plot histograms of the distribution of runtimeMinutes for each decade.
+```
+p <- ggplot(data = s, aes(x = runtimeMinutes)) + 
+  geom_histogram() + facet_wrap(~ decade, nrow = 1)
+p
+```
+##3##calculate the *population* mean and *population* standard deviation in runtimeMinutes for each decade - apparantely need the pipe operator...
+```
+library(radiant)
 
-###subsample 100 movies from each decade, calculate mean and standard deviation in runtimeMinutes, estimate the SE around the pop mean runtimeMinutes for each decade...lots of info...
+results <- group_by(s, decade) %>% summarize(newmean = mean(runtimeMinutes), sd = sdpop(runtimeMinutes))
+results
+````
 
-n = 100
+##4##subsample 100 movies from each decade, calculate mean and standard deviation in runtimeMinutes, estimate the SE around the pop mean runtimeMinutes for each decade...lots of info...
+# using the mosaic package
 
-###Compare results to actual pop means for runtimeMinutes and calculated SE ...lots of info...
+```
+news <-
+s %>%
+group_by(decade) %>%
+sample_n(size = 100) %>%
+mutate(mean = mean(runtimeMinutes), sd = sd(runtimeMinutes), SE = sd/sqrt(100))
+```
 
-stuff
+##5##Compare results to actual pop means for runtimeMinutes and calculated SE ...lots of info...
+```
+compare <-
+news %>% 
+sample_n(size = 100) %>%
+mutate(meanpop = mean(runtimeMinutes), sdpop = sd(runtimeMinutes), SEpop = sdpop/sqrt(100))
 
-###Generate a sampling distribution of mean runtimeMinutes for each decade by [a] drawing 10,000 samples of 100 movies from each decade and, for each sample, [b] calculating the mean runtimeMinutes and the standard deviation in runtimeMinutes. Recall that the standard deviation of the sampling distribution is another estimate of the standard error in the opulation mean for a particular sample size.
+mean_difference <-
+compare %>%
+sdcompare = ((sd - sdpop)/100)
+```
+
+##6##Generate a sampling distribution of mean runtimeMinutes for each decade by [a] drawing 10,000 samples of 100 movies from each decade and, for each sample, [b] calculating the mean runtimeMinutes and the standard deviation in runtimeMinutes. Recall that the standard deviation of the sampling distribution is another estimate of the standard error in the opulation mean for a particular sample size.
+##6a##
+```
+m <-mean(s$runtimeMinutes)
+k <- 10000 # number of samples
+n <- 100 # size of each sample
+dummy <- list(length = k) # create a dummy variable to hold each sample
+for (i in 1:k) {
+ dummy[[i]] <- sample(m, size = n, replace = TRUE)
+}
+head(dummy)
+```
+##6b##
+```
+sd <- sd(s$runtimeMinutes)
+k <- 10000 # number of samples
+n <- 100 # size of each sample
+dummy2 <- list(length = k) # create a dummy variable to hold each sample
+for (i in 1:k) {
+ dummy2[[i]] <- sample(sd, size = n, replace = TRUE)
+}
+head(dummy2)
+```
 
 ##Challenge 2
-##Complicated details and language...
-###What is the probability that she will hear 13 or fewer calls during any given session?
-code
+###What is the probability that she will hear 13 or fewer calls during any given session?###
+```
+ppois(13,lambda=18)
+```
 ###What is the probability that she will hear no calls in a session?
-code
+```
+ppois(0,lambda=18)
+```
 ###What is the probability that she will hear exactly 7 calls in a session?
-code
+```
+dpois(7,lambda=18)
+```
 ###What is the probability that she will hear more than 20 calls in a session?
-code
-###Plot the relevant Poisson mass function over the values in range 0 ≤ x ≤ 40.
-plot(Poisson, x =< 40, x =>0)
-###simulate 520 results from this distribution (i.e., 10 full years of Saturday monitoring sessions).
-rpois(x)
+```
+1-ppois(20, lambda=18)
+```
+###Plot the relevant Poisson mass function over the values in range 0 ≤  x ≤ 40. ≤
+```
+x <- 0:40
+lambda = 18
+poisdist <- dpois(x, lambda)
+barplot(poisdist, names.arg = y,
+       space = 0, xlab = "x", ylab = "Pr(X = x)",
+       main = paste0("Probability Mass Function\nlambda = ", l))
+```
+###Using the rpois() function, simulate 520 results from this distribution (i.e., 10 full years of Saturday monitoring sessions).
+```
+sim<-rpois(520, l)
+```
+
 ###Plot the simulated results using the histogram() function from the {mosaic} package and use xlim() to set the horizontal limits to be from 0 to 40. How do your simulated results compare to the shape of the probability mass function you plotted above?
-library(mosaic)
-lattice::histogram(~fastest,data=m111survey,
-       type="density",
-       xlab="speed (mph)",
-       main="Fastest Speed Ever Driven")
-       
+```
+hist(sim, xlim = c(0,40))
+
+x <- 0:40
+l = 18
+poisdist <- dpois(x, lambda = l)
+barplot(poisdist, names.arg = y,
+       space = 10, xlab = "x", ylab = "Pr(X = x)",
+       main = paste0("Probability Mass Function\nlambda = ", l))
+```      
 ##Challenge 3
+```
 library(curl)
 f <- curl("https://raw.githubusercontent.com/difiore/ADA-datasets/master/zombies.csv")
 d <- read_csv(f, col_names = TRUE) # creates a "tibble"
-
+```
 ###Calculate the population mean and standard deviation for each quantitative random variable (height, weight, age, number of zombies killed, and years of education).
-
-pop mean and sdev again
-
+#####Mean
+```
+(pop_mean_height <- mean(d$height)) 
+(pop_mean_weight <- mean(d$weight)) 
+(pop_mean_age <- mean(d$age)) 
+(pop_mean_zombies_killed <- mean(d$zombies_killed))
+(pop_mean_years_of_education <- mean(d$years_of_education)) 
+```
+####Standard Deviations
+```
+(pop_var_height <- var(d$height) 
+(pop_var_weight <- var(d$weight)) 
+(pop_var_age <- var(d$age)) 
+(pop_var_zombies_killed <- var(d$zombies_killed))
+(pop_var_years_of_education <- var(d$years_of_education)) 
+```
 ###Use {ggplot2} and make scatterplots of height and weight in relation to age. Do these variables seem to be related? (YES) In what way? (LINEAR RELATIONSHIP)
-
+```
 library(ggplot2)
 # Basic scatter plot height
 (h <- ggplot(d, aes(x=height, y=age)) + geom_point())
 # Basic scatter plot weight
 (w <- ggplot(d, aes(x=weight, y=age)) + geom_point())
-
-###Using histograms and Q-Q plots, check whether the quantitative variables seem to be drawn from a normal distribution. Which seem to be and which do not?
-
-plot for histogram and qqplots
-
-manipulate(
-  ggplot(data = data.frame(x = c(mu - 4 * sigma, mu + 4 * sigma)), aes(x)) + stat_function(fun = dnorm, args = list(mean = mu, sd = sigma), n = 1000) + xlab("x") + ylab("f(x)") + labs(title = "Exploring the Normal Distribution", subtitle = paste0("Cumulative Probability Under Curve = ", round(pnorm(mu + nsigma * sigma, mu, sigma) - pnorm(mu - nsigma * sigma, mu, sigma), 3))) +
-    stat_function(fun = dnorm, xlim = c(mu - nsigma * sigma, mu + nsigma * sigma), args = list(mean = mu, sd = sigma), n = 1000, geom = "area", fill = "red", alpha = 0.5, color = "red"),
-  mu = slider(-100, 100, initial = 0, step = 10),
-  sigma = slider(0, 30, initial = 5, step = 1),
-  nsigma = slider(0, 4, initial = 0, step = 0.25)
-)
-
-###Now use the sample_n() function from {dplyr} to sample ONE subset of 30 zombie apocalypse survivors (without replacement) from this population and calculate the mean and sample standard deviation for each variable. Also estimate the standard error for each variable and construct the 95% confidence interval for each mean. Note that for the variables that are not drawn from the normal distribution, you will need to base your estimate of the CIs on some different theoretical distribution!
-sample_n()
-
-###Now draw another 99 random samples of 30 zombie apocalypse survivors out and calculate the mean for each of the these samples. Together with the first sample you drew out, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of the sampling distribution for each variable? How do the standard deviations compare to the standard errors estimated in the question about and to those calculated using the population standard deviation? What do these sampling distributions look like? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
-
-```{r pressure, echo=FALSE}
-plot(pressure)
 ```
+###Using histograms and Q-Q plots, check whether the quantitative variables seem to be drawn from a normal distribution. Which seem to be and which do not? (height, YES but weight, NO - looks like the first quantile contains less density than the second and thrid. 
+#plot for histogram and qqplots
+#Histogram
+```
+histogram(d$height, type = "density")
 
+histogram(d$weight, type = "density")
+
+histogram(d$zombies_killed, type = "density")
+
+histogram(d$years_of_education, type = "density")
+
+histogram(d$age, type = "density")
+```
+#QQ plot 
+```
+qqnorm(d$height, main = "QQ Plot - Random Normal Variable")
+qqline(d$height, col = "gray")
+
+qqnorm(d$weight, main = "QQ Plot - Random Normal Variable")
+qqline(d$weight, col = "gray")
+
+qqnorm(d$years_of_education, main = "QQ Plot - Random Normal Variable")
+qqline(d$years_of_education, col = "gray")
+
+qqnorm(d$zombies_killed, main = "QQ Plot - Random Normal Variable")
+qqline(d$zombies_killed, col = "gray")
+
+qqnorm(d$age, main = "QQ Plot - Random Normal Variable")
+qqline(d$age, col = "gray")
+```
+###Now use the sample_n() function from {dplyr} to sample ONE subset of 30 zombie apocalypse survivors (without replacement) from this population and calculate the mean and sample standard deviation for each variable. Also estimate the standard error for each variable and construct the 95% confidence interval for each mean. Note that for the variables that are not drawn from the normal distribution, you will need to base your estimate of the CIs on some different theoretical distribution!
+```
+set.seed(30)
+s <- sample_n(d$height, size = 30, replace = FALSE)
+(m <- mean(s))
+(sd <- sd(d$height))
+(se <- sd/sqrt(30))
+percent_ci <- 95
+alpha <- 1 - percent_ci / 100 # alpha = 0.05
+lower <- m + qnorm(alpha / 2) * se
+# where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
+upper <- m + qnorm(1 - alpha / 2) * se
+# where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
+ci <- c(lower, upper)
+ci
+
+s2 <- sample_n(d$weight, size = 30, replace = FALSE)
+(m <- mean(s))
+(sd <- sd(d$weight))
+(se <- sd/sqrt(100))
+percent_ci <- 95
+alpha <- 1 - percent_ci / 100 # alpha = 0.05
+lower <- m + qnorm(alpha / 2) * se
+# where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
+upper <- m + qnorm(1 - alpha / 2) * se
+# where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
+ci2 <- c(lower, upper)
+ci2
+
+set.seed(30)
+s <- sample_n(d$height, size = 30, replace = FALSE)
+(m <- mean(s))
+(sd <- sd(d$height))
+(se <- sd/sqrt(30))
+percent_ci <- 95
+alpha <- 1 - percent_ci / 100 # alpha = 0.05
+lower <- m + qnorm(alpha / 2) * se
+# where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
+upper <- m + qnorm(1 - alpha / 2) * se
+# where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
+ci <- c(lower, upper)
+ci
+
+s2 <- sample_n(d$weight, size = 30, replace = FALSE)
+(m <- mean(s))
+(sd <- sd(d$age))
+(se <- sd/sqrt(30))
+percent_ci <- 95
+alpha <- 1 - percent_ci / 100 # alpha = 0.05
+lower <- m + qnorm(alpha / 2) * se
+# where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
+upper <- m + qnorm(1 - alpha / 2) * se
+# where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
+ci2 <- c(lower, upper)
+ci2
+
+set.seed(30)
+s <- sample_n(d$height, size = 30, replace = FALSE)
+(m <- mean(s))
+(sd <- sd(d$height))
+(se <- sd/sqrt(30))
+percent_ci <- 95
+alpha <- 1 - percent_ci / 100 # alpha = 0.05
+lower <- m + qnorm(alpha / 2) * se
+# where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
+upper <- m + qnorm(1 - alpha / 2) * se
+# where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
+ci <- c(lower, upper)
+ci
+
+s2 <- sample_n(d$weight, size = 30, replace = FALSE)
+(m <- mean(s))
+(sd <- sd(d$zombies_killed))
+(se <- sd/sqrt(30))
+percent_ci <- 95
+alpha <- 1 - percent_ci / 100 # alpha = 0.05
+lower <- m + qnorm(alpha / 2) * se
+# where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
+upper <- m + qnorm(1 - alpha / 2) * se
+# where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
+ci2 <- c(lower, upper)
+ci2
+
+set.seed(30)
+s <- sample_n(d$height, size = 30, replace = FALSE)
+(m <- mean(s))
+(sd <- sd(d$height))
+(se <- sd/sqrt(30))
+percent_ci <- 95
+alpha <- 1 - percent_ci / 100 # alpha = 0.05
+lower <- m + qnorm(alpha / 2) * se
+# where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
+upper <- m + qnorm(1 - alpha / 2) * se
+# where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
+ci <- c(lower, upper)
+ci
+
+s4 <- sample_n(d$weight, size = 30, replace = FALSE)
+(m <- mean(s))
+(sd <- sd(d$years_of_education))
+(se <- sd/sqrt(30))
+percent_ci <- 95
+alpha <- 1 - percent_ci / 100 # alpha = 0.05
+lower <- m + qnorm(alpha / 2) * se
+# where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
+upper <- m + qnorm(1 - alpha / 2) * se
+# where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
+ci4 <- c(lower, upper)
+ci4
+```
+###Now draw another 99 random samples of 30 zombie apocalypse survivors out and calculate the mean for each of the these samples. Together with the first sample you drew out, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of the sampling distribution for each variable? How do the standard deviations compare to the standard errors estimated in the question about and to those calculated using the population standard deviation? What do these sampling distributions look like? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
+#Perhaps this is what we use rnorm for.
+```
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
