@@ -476,7 +476,8 @@ d &lt;- read_csv(f, col_names = TRUE) # creates a &quot;tibble&quot;</code></pre
 # Basic scatter plot weight
 (w &lt;- ggplot(d, aes(x=weight, y=age)) + geom_point())</code></pre>
 <p>###Using histograms and Q-Q plots, check whether the quantitative variables seem to be drawn from a normal distribution. Which seem to be and which do not? (height, YES but weight, NO - looks like the first quantile contains less density than the second and thrid. #plot for histogram and qqplots #Histogram</p>
-<pre><code>histogram(d$height, type = &quot;density&quot;)
+<pre><code>library(mosaic)
+histogram(d$height, type = &quot;density&quot;)
 
 histogram(d$weight, type = &quot;density&quot;)
 
@@ -502,7 +503,7 @@ qqnorm(d$age, main = &quot;QQ Plot - Random Normal Variable&quot;)
 qqline(d$age, col = &quot;gray&quot;)</code></pre>
 <p>###Now use the sample_n() function from {dplyr} to sample ONE subset of 30 zombie apocalypse survivors (without replacement) from this population and calculate the mean and sample standard deviation for each variable. Also estimate the standard error for each variable and construct the 95% confidence interval for each mean. Note that for the variables that are not drawn from the normal distribution, you will need to base your estimate of the CIs on some different theoretical distribution!</p>
 <pre><code>set.seed(30)
-s &lt;- sample_n(d$height, size = 30, replace = FALSE)
+s &lt;- sample_n(d, size = 30, replace = FALSE)
 (m &lt;- mean(s))
 (sd &lt;- sd(d$height))
 (se &lt;- sd/sqrt(30))
@@ -518,7 +519,7 @@ ci
 s2 &lt;- sample_n(d$weight, size = 30, replace = FALSE)
 (m &lt;- mean(s))
 (sd &lt;- sd(d$weight))
-(se &lt;- sd/sqrt(100))
+(se &lt;- sd/sqrt(30))
 percent_ci &lt;- 95
 alpha &lt;- 1 - percent_ci / 100 # alpha = 0.05
 lower &lt;- m + qnorm(alpha / 2) * se
@@ -528,21 +529,7 @@ upper &lt;- m + qnorm(1 - alpha / 2) * se
 ci2 &lt;- c(lower, upper)
 ci2
 
-set.seed(30)
-s &lt;- sample_n(d$height, size = 30, replace = FALSE)
-(m &lt;- mean(s))
-(sd &lt;- sd(d$height))
-(se &lt;- sd/sqrt(30))
-percent_ci &lt;- 95
-alpha &lt;- 1 - percent_ci / 100 # alpha = 0.05
-lower &lt;- m + qnorm(alpha / 2) * se
-# where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
-upper &lt;- m + qnorm(1 - alpha / 2) * se
-# where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
-ci &lt;- c(lower, upper)
-ci
-
-s2 &lt;- sample_n(d$weight, size = 30, replace = FALSE)
+s3 &lt;- sample_n(d$age, size = 30, replace = FALSE)
 (m &lt;- mean(s))
 (sd &lt;- sd(d$age))
 (se &lt;- sd/sqrt(30))
@@ -552,24 +539,10 @@ lower &lt;- m + qnorm(alpha / 2) * se
 # where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
 upper &lt;- m + qnorm(1 - alpha / 2) * se
 # where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
-ci2 &lt;- c(lower, upper)
-ci2
+ci3 &lt;- c(lower, upper)
+ci3
 
-set.seed(30)
-s &lt;- sample_n(d$height, size = 30, replace = FALSE)
-(m &lt;- mean(s))
-(sd &lt;- sd(d$height))
-(se &lt;- sd/sqrt(30))
-percent_ci &lt;- 95
-alpha &lt;- 1 - percent_ci / 100 # alpha = 0.05
-lower &lt;- m + qnorm(alpha / 2) * se
-# where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
-upper &lt;- m + qnorm(1 - alpha / 2) * se
-# where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
-ci &lt;- c(lower, upper)
-ci
-
-s2 &lt;- sample_n(d$weight, size = 30, replace = FALSE)
+s4 &lt;- sample_n(d$zombies_killed, size = 30, replace = FALSE)
 (m &lt;- mean(s))
 (sd &lt;- sd(d$zombies_killed))
 (se &lt;- sd/sqrt(30))
@@ -579,24 +552,10 @@ lower &lt;- m + qnorm(alpha / 2) * se
 # where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
 upper &lt;- m + qnorm(1 - alpha / 2) * se
 # where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
-ci2 &lt;- c(lower, upper)
-ci2
+ci4 &lt;- c(lower, upper)
+ci4
 
-set.seed(30)
-s &lt;- sample_n(d$height, size = 30, replace = FALSE)
-(m &lt;- mean(s))
-(sd &lt;- sd(d$height))
-(se &lt;- sd/sqrt(30))
-percent_ci &lt;- 95
-alpha &lt;- 1 - percent_ci / 100 # alpha = 0.05
-lower &lt;- m + qnorm(alpha / 2) * se
-# where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
-upper &lt;- m + qnorm(1 - alpha / 2) * se
-# where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
-ci &lt;- c(lower, upper)
-ci
-
-s4 &lt;- sample_n(d$weight, size = 30, replace = FALSE)
+s5 &lt;- sample_n(d$years_of_education, size = 30, replace = FALSE)
 (m &lt;- mean(s))
 (sd &lt;- sd(d$years_of_education))
 (se &lt;- sd/sqrt(30))
@@ -606,9 +565,11 @@ lower &lt;- m + qnorm(alpha / 2) * se
 # where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
 upper &lt;- m + qnorm(1 - alpha / 2) * se
 # where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
-ci4 &lt;- c(lower, upper)
-ci4</code></pre>
-<p>###Now draw another 99 random samples of 30 zombie apocalypse survivors out and calculate the mean for each of the these samples. Together with the first sample you drew out, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of the sampling distribution for each variable? How do the standard deviations compare to the standard errors estimated in the question about and to those calculated using the population standard deviation? What do these sampling distributions look like? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution? #Perhaps this is what we use rnorm for. ``<code>Note that the</code>echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.</p>
+ci5 &lt;- c(lower, upper)
+ci5</code></pre>
+<p>###Now draw another 99 random samples of 30 zombie apocalypse survivors out and calculate the mean for each of the these samples. Together with the first sample you drew out, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of the sampling distribution for each variable? How do the standard deviations compare to the standard errors estimated in the question about and to those calculated using the population standard deviation? What do these sampling distributions look like? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution? #Perhaps this is what we use rnorm for. ``` set.seed(30) s &lt;- sample_n(d, size = 30, replace = FALSE) (m &lt;- mean(s)) (sd &lt;- sd(d$height)) (se &lt;- sd/sqrt(30)) percent_ci &lt;- 95 alpha &lt;- 1 - percent_ci / 100 # alpha = 0.05 lower &lt;- m + qnorm(alpha / 2) * se # where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution upper &lt;- m + qnorm(1 - alpha / 2) * se # where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution ci &lt;- c(lower, upper) ci</p>
+<p>mu &lt;- 10 sigma &lt;- 2 for (n in seq(from = 1, to = 99)) { # set up a variable, reps, to hold set of variances calculated for each replicate reps &lt;- vector(“double”, 50) for (i in 1:99) { x &lt;- rnorm(n, mean = mu, sd = sigma) points(n, var(x)) reps[[i]] &lt;- var(x) } points(n, mean(reps), bg = “red”, pch = 23, cex = 2) # plots average }</p>
+<p>Note that the <code>echo = FALSE</code> parameter was added to the code chunk to prevent printing of the R code that generated the plot.</p>
 
 
 

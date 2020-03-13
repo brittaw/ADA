@@ -177,6 +177,7 @@ library(ggplot2)
 #plot for histogram and qqplots
 #Histogram
 ```
+library(mosaic)
 histogram(d$height, type = "density")
 
 histogram(d$weight, type = "density")
@@ -207,7 +208,7 @@ qqline(d$age, col = "gray")
 ###Now use the sample_n() function from {dplyr} to sample ONE subset of 30 zombie apocalypse survivors (without replacement) from this population and calculate the mean and sample standard deviation for each variable. Also estimate the standard error for each variable and construct the 95% confidence interval for each mean. Note that for the variables that are not drawn from the normal distribution, you will need to base your estimate of the CIs on some different theoretical distribution!
 ```
 set.seed(30)
-s <- sample_n(d$height, size = 30, replace = FALSE)
+s <- sample_n(d, size = 30, replace = FALSE)
 (m <- mean(s))
 (sd <- sd(d$height))
 (se <- sd/sqrt(30))
@@ -223,7 +224,7 @@ ci
 s2 <- sample_n(d$weight, size = 30, replace = FALSE)
 (m <- mean(s))
 (sd <- sd(d$weight))
-(se <- sd/sqrt(100))
+(se <- sd/sqrt(30))
 percent_ci <- 95
 alpha <- 1 - percent_ci / 100 # alpha = 0.05
 lower <- m + qnorm(alpha / 2) * se
@@ -233,21 +234,7 @@ upper <- m + qnorm(1 - alpha / 2) * se
 ci2 <- c(lower, upper)
 ci2
 
-set.seed(30)
-s <- sample_n(d$height, size = 30, replace = FALSE)
-(m <- mean(s))
-(sd <- sd(d$height))
-(se <- sd/sqrt(30))
-percent_ci <- 95
-alpha <- 1 - percent_ci / 100 # alpha = 0.05
-lower <- m + qnorm(alpha / 2) * se
-# where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
-upper <- m + qnorm(1 - alpha / 2) * se
-# where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
-ci <- c(lower, upper)
-ci
-
-s2 <- sample_n(d$weight, size = 30, replace = FALSE)
+s3 <- sample_n(d$age, size = 30, replace = FALSE)
 (m <- mean(s))
 (sd <- sd(d$age))
 (se <- sd/sqrt(30))
@@ -257,24 +244,10 @@ lower <- m + qnorm(alpha / 2) * se
 # where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
 upper <- m + qnorm(1 - alpha / 2) * se
 # where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
-ci2 <- c(lower, upper)
-ci2
+ci3 <- c(lower, upper)
+ci3
 
-set.seed(30)
-s <- sample_n(d$height, size = 30, replace = FALSE)
-(m <- mean(s))
-(sd <- sd(d$height))
-(se <- sd/sqrt(30))
-percent_ci <- 95
-alpha <- 1 - percent_ci / 100 # alpha = 0.05
-lower <- m + qnorm(alpha / 2) * se
-# where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
-upper <- m + qnorm(1 - alpha / 2) * se
-# where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
-ci <- c(lower, upper)
-ci
-
-s2 <- sample_n(d$weight, size = 30, replace = FALSE)
+s4 <- sample_n(d$zombies_killed, size = 30, replace = FALSE)
 (m <- mean(s))
 (sd <- sd(d$zombies_killed))
 (se <- sd/sqrt(30))
@@ -284,11 +257,27 @@ lower <- m + qnorm(alpha / 2) * se
 # where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
 upper <- m + qnorm(1 - alpha / 2) * se
 # where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
-ci2 <- c(lower, upper)
-ci2
+ci4 <- c(lower, upper)
+ci4
 
+s5 <- sample_n(d$years_of_education, size = 30, replace = FALSE)
+(m <- mean(s))
+(sd <- sd(d$years_of_education))
+(se <- sd/sqrt(30))
+percent_ci <- 95
+alpha <- 1 - percent_ci / 100 # alpha = 0.05
+lower <- m + qnorm(alpha / 2) * se
+# where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
+upper <- m + qnorm(1 - alpha / 2) * se
+# where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
+ci5 <- c(lower, upper)
+ci5
+```
+###Now draw another 99 random samples of 30 zombie apocalypse survivors out and calculate the mean for each of the these samples. Together with the first sample you drew out, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of the sampling distribution for each variable? How do the standard deviations compare to the standard errors estimated in the question about and to those calculated using the population standard deviation? What do these sampling distributions look like? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
+#Perhaps this is what we use rnorm for.
+```
 set.seed(30)
-s <- sample_n(d$height, size = 30, replace = FALSE)
+s <- sample_n(d, size = 30, replace = FALSE)
 (m <- mean(s))
 (sd <- sd(d$height))
 (se <- sd/sqrt(30))
@@ -301,20 +290,23 @@ upper <- m + qnorm(1 - alpha / 2) * se
 ci <- c(lower, upper)
 ci
 
-s4 <- sample_n(d$weight, size = 30, replace = FALSE)
-(m <- mean(s))
-(sd <- sd(d$years_of_education))
-(se <- sd/sqrt(30))
-percent_ci <- 95
-alpha <- 1 - percent_ci / 100 # alpha = 0.05
-lower <- m + qnorm(alpha / 2) * se
-# where qnorm(alpha /2) is the 2.5% quantile of the standard normal distribution
-upper <- m + qnorm(1 - alpha / 2) * se
-# where qnorm(1 - alpha / 2) is the 97.5% quantile of the standard normal distribution
-ci4 <- c(lower, upper)
-ci4
-```
-###Now draw another 99 random samples of 30 zombie apocalypse survivors out and calculate the mean for each of the these samples. Together with the first sample you drew out, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of the sampling distribution for each variable? How do the standard deviations compare to the standard errors estimated in the question about and to those calculated using the population standard deviation? What do these sampling distributions look like? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
-#Perhaps this is what we use rnorm for.
-```
+mu <- 10
+sigma <- 2
+for (n in seq(from = 1, to = 99))
+{
+  # set up a variable, reps, to hold set of variances calculated for each replicate
+  reps <- vector("double", 50)
+  for (i in 1:99) 
+  {
+    x <- rnorm(n, mean = mu, sd = sigma)
+    points(n, var(x))
+    reps[[i]] <- var(x)
+  }
+  points(n, mean(reps), bg = "red", pch = 23, cex = 2) # plots average
+}
+
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+
